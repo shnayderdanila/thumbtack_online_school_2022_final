@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="net.thumbtack.school.buscompany.mappers.mybatis.TripMapper">
+
+    <resultMap id="resultTrip" type="net.thumbtack.school.buscompany.models.Trip">
+
+        <result property="id"          column="id_trip"        />
+        <result property="fromStation" column="from_station"   />
+        <result property="toStation"   column="to_station"     />
+        <result property="start"       column="start"          />
+        <result property="duration"    column="duration"       />
+        <result property="price"       column="price"          />
+        <result property="approved"    column="approved"       />
+
+        <association property="bus" javaType="net.thumbtack.school.buscompany.models.Bus">
+
+            <result property="id"         column= "id_bus"       />
+            <result property="busName"    column= "busname"      />
+            <result property="placeCount" column= "place_count"  />
+
+        </association>
+
+        <association property="schedule" javaType="net.thumbtack.school.buscompany.models.Schedule">
+
+            <result property="fromDate" column= "from_date" />
+            <result property="toDate"   column= "to_date"   />
+            <result property="period"   column= "period"    />
+
+        </association>
+
+        <collection property=   "dates"
+                    column=     "id_trip"
+                    javaType=   "java.util.List"
+                    ofType=     "net.thumbtack.school.buscompany.models.TripDate"
+                    select=     "net.thumbtack.school.buscompany.mappers.mybatis.TripDateMapper.getTripsDateByTrip"
+                    fetchType=  "eager">
+        </collection>
+
+
+    </resultMap>
+
+    <select id="getTripById" parameterType="int" resultMap="resultTrip">
+        SELECT
+                trip.id AS id_trip,
+                from_station, to_station,
+                start, duration,
+                price,
+                approved,
+
+                bus.id AS id_bus,
+                bus.bus_name AS busname,
+                place_count,
+
+                from_date,
+                to_date,
+                period
+
+        FROM    trip
+                LEFT OUTER JOIN
+                schedule    ON id_trip = schedule.id_trip
+                LEFT OUTER JOIN
+                bus         ON bus.id = trip.id_bus
+        WHERE trip.id = #{id}
+
+    </select>
+
+    <select id="getTripsWithParam"
+            parameterType="net.thumbtack.school.buscompany.dto.request.GetTripParamsDtoRequest"
+            resultMap="resultTrip" >
+        SELECT
+            trip.id AS id_trip,
+            from_station, to_station,
+            start, duration,
+            price,
+            approved,
+
+            bus.id AS id_bus,
+            bus.bus_name AS busname,
+            place_count,
+
+            from_date,
+            to_date,
+            period
+
+        FROM    trip
+            LEFT OUTER JOIN
+            schedule    ON trip.id = schedule.id_trip
+            LEFT OUTER JOIN
+            bus         ON bus.id = trip.id_bus
+            <if test="fromStation != null or toStation != null or
+                      fromDate    != null or toDate    != null or
+                      busName     != null">
+                WHERE
+                <if test="fromStation != null">
+                    from_station = #{fromStation}
+                </if>
+                <if test="fromStation != null and toStation != null">
+                    AND
+                </if>
+                <if test="toStation != null">
+                    to_station = #{toStation}
+                </if>
+                <if test="(fromStation != null or toStation != null) and fromDate != null">
+                    AND
+                </if>
+                <if test="fromDate != null">
+                    from_date = #{fromDate}
+                </if>
+                <if test="(fromStation != null or toStation != null or fromDate != null) and toDate != null">
+                    AND
+                </if>
+                <if test="toDate != null">
+                    to_date = #{toDate}
+                </if>
+                <if test="( fromStation != null or toStation != null or
+                            fromDate    != null or toDate    != null ) and
+                            busName     != null">
+                    AND
+                </if>
+                <if test="busName != null">
+                    bus.bus_name = #{busName}
+                </if>
+            </if>
+
+    </select>
+
+</mapper>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="net.thumbtack.school.buscompany.mappers.mybatis.BusMapper">
+
+    <resultMap  id="resultBus" type="net.thumbtack.school.buscompany.models.Bus">
+
+        <result property=   "busName"            column="bus_name" />
+        <result property=   "placeCount"         column="place_count"  />
+
+    </resultMap>
+
+    <select id="getBusByName1" parameterType="java.lang.String" resultMap="resultBus">
+
+        SELECT bus_name AS busName, place_count AS placeCount FROM bus WHERE bus_name = #{busName}
+
+    </select>
+
+
+</mapper>

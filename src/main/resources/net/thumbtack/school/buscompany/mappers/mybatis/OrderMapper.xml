@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="net.thumbtack.school.buscompany.mappers.mybatis.OrderMapper">
+
+    <resultMap id="resultOrder" type="net.thumbtack.school.buscompany.models.Order">
+
+        <result property="id"         column="id_order"    />
+        <result property="totalPrice" column="total_price" />
+
+        <association property=  "tripDate"
+                     column=    "id_trip_date"
+                     javaType=  "net.thumbtack.school.buscompany.models.TripDate"
+                     select=    "net.thumbtack.school.buscompany.mappers.mybatis.TripDateMapper.getTripDateById"
+                     fetchType= "lazy">
+        </association>
+
+        <collection property="passengers" javaType="List" ofType="net.thumbtack.school.buscompany.models.Passenger">
+
+            <result property="id"        column="id_pass" />
+            <result property="firstName" column="firstname" />
+            <result property="lastName"  column="lastname"  />
+            <result property="passport"  column="passport"  />
+
+        </collection>
+
+    </resultMap>
+
+    <resultMap id="resultOrderWithParam" type="net.thumbtack.school.buscompany.models.Order">
+
+        <result property="id"         column="id_order"    />
+        <result property="totalPrice" column="total_price" />
+
+        <association property="tripDate">
+
+            <result property="id"   column="id_trip_date"/>
+            <result property="date" column="trip_date"/>
+
+            <association property="trip">
+
+                <result property="id"           column="id_trip"        />
+                <result property="fromStation"  column="from_station"   />
+                <result property="toStation"    column="to_station"     />
+                <result property="start"        column="start"          />
+                <result property="duration"     column="duration"       />
+                <result property="price"        column="price"          />
+                <result property="approved"     column="approved"       />
+
+                <association property="bus" javaType="net.thumbtack.school.buscompany.models.Bus">
+
+                    <result property="busName"       column= "busname"      />
+                    <result property="placeCount"    column= "place_count"  />
+
+                </association>
+
+                <association property="schedule" javaType="net.thumbtack.school.buscompany.models.Schedule">
+
+                    <result property="fromDate"     column= "from_date" />
+                    <result property="toDate"       column= "to_date"   />
+                    <result property="period"       column= "period"    />
+
+                </association>
+
+            </association>
+
+        </association>
+
+        <collection property="passengers" javaType="List" ofType="net.thumbtack.school.buscompany.models.Passenger">
+
+            <result property="id"        column="id_pass" />
+            <result property="firstName" column="firstname" />
+            <result property="lastName"  column="lastname"  />
+            <result property="passport"  column="passport"  />
+
+        </collection>
+
+    </resultMap>
+
+    <select id="getOrdersLazyByClient" parameterType="int" resultMap="resultOrder">
+        SELECT
+            `order`.id AS id_order,
+            total_price,
+            id_trip_date,
+            id_client,
+
+            passenger.id AS id_pass,
+            firstname,
+            lastname,
+            passport
+
+        FROM `order` JOIN passenger ON `order`.id = passenger.id_order
+        WHERE id_client = #{idClient}
+    </select>
+
+    <select id="getOrdersLazyByTripDate" parameterType="int" resultMap="resultOrder">
+        SELECT
+            `order`.id AS id_order,
+            total_price,
+            id_trip_date,
+
+            passenger.id AS id_pass,
+            firstname,
+            lastname,
+            passport
+
+        FROM `order`
+            JOIN passenger ON `order`.id = passenger.id_order
+        WHERE id_trip_date = #{idTripDate}
+    </select>
+
+    <select id="getOrdersWithParam" parameterType="net.thumbtack.school.buscompany.dto.request.GetOrderParamsDtoRequest" resultMap="resultOrderWithParam">
+        SELECT
+
+        `order`.id AS id_order,
+        total_price,
+
+        passenger.id AS id_pass,
+        firstname,
+        lastname,
+        passport,
+
+        trip.id AS id_trip,
+        from_station,
+        to_station,
+        start,
+        duration,
+        price,
+        approved,
+
+        bus.bus_name AS busname,
+        place_count,
+
+        from_date,
+        to_date,
+        period,
+
+        id_trip_date
+        trip_date
+
+        FROM `order`
+        JOIN passenger  ON `order`.id = passenger.id_order
+        JOIN trip_date  ON id_trip_date = trip_date.id
+        JOIN trip       ON trip.id = trip_date.id_trip
+
+        LEFT OUTER JOIN
+        schedule    ON trip.id = schedule.id_trip
+        LEFT OUTER JOIN
+        bus         ON bus.id = trip.id_bus
+
+        <if test="fromStation != null or toStation != null or
+                      fromDate    != null or toDate    != null or
+                      busName     != null or clientId != null">
+            WHERE
+            <if test="clientId">
+                id_client = #{clientId}
+            </if>
+            <if test="clientId != null and fromStation != null">
+                AND
+            </if>
+            <if test="fromStation != null">
+                from_station = #{fromStation}
+            </if>
+            <if test="(fromStation != null or clientId != null) and toStation != null">
+                AND
+            </if>
+            <if test="toStation != null">
+                to_station = #{toStation}
+            </if>
+            <if test="(fromStation != null or toStation != null or clientId != null) and fromDate != null">
+                AND
+            </if>
+            <if test="fromDate != null">
+                from_date = #{fromDate}
+            </if>
+            <if test="(fromStation != null or toStation != null or fromDate != null or clientId != null) and toDate != null">
+                AND
+            </if>
+            <if test="toDate != null">
+                to_date = #{toDate}
+            </if>
+            <if test="( fromStation != null or toStation != null or
+                            fromDate    != null or toDate    != null  or clientId != null) and
+                            busName     != null">
+                AND
+            </if>
+            <if test="busName != null">
+                bus.bus_name = #{busName}
+            </if>
+        </if>
+
+    </select>
+
+</mapper>

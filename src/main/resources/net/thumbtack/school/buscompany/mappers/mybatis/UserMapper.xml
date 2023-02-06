@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="net.thumbtack.school.buscompany.mappers.mybatis.UserMapper">
+
+    <resultMap id="resultUser" type="net.thumbtack.school.buscompany.models.User">
+
+        <result property=   "id"            column="id"/>
+        <result property=   "firstName"     column="firstname"/>
+        <result property=   "lastName"      column="lastname"/>
+        <result property=   "patronymic"    column="patronymic"/>
+        <result property=   "login"         column="login"/>
+        <result property=   "password"      column="password"/>
+        <result property=   "userType"      column="user_type"/>
+
+        <discriminator javaType="net.thumbtack.school.buscompany.models.UserType" column="user_type">
+            <case value="ADMIN" resultType="net.thumbtack.school.buscompany.models.Admin">
+
+                <result property="position" column="position" />
+
+            </case>
+
+            <case value="CLIENT" resultType="net.thumbtack.school.buscompany.models.Client">
+
+                <result property=   "phone" column=    "phone" />
+                <result property=   "email" column=    "email" />
+                <collection property= "orders"
+                            column="id"
+                            javaType="List"
+                            ofType="net.thumbtack.school.buscompany.models.Order"
+                            select="net.thumbtack.school.buscompany.mappers.mybatis.OrderMapper.getOrdersLazyByClient"
+                            fetchType="lazy">
+
+                </collection>
+            </case>
+        </discriminator>
+    </resultMap>
+
+    <select id="getUserByLogin" parameterType="java.lang.String" resultMap="resultUser">
+        SELECT
+            U.id,
+            firstname, lastname, patronymic,
+            login, password,
+            position,
+            user_type,
+            email, phone
+        FROM    user        AS U
+                LEFT JOIN
+                    admin   AS A ON A.id_user = U.id
+                LEFT JOIN
+                    client  AS C ON C.id_user = U.id
+        WHERE U.login = #{login} AND deleted = false
+    </select>
+
+    <select id="getUserById" parameterType="int" resultMap="resultUser">
+        SELECT
+            U.id,
+            firstname, lastname, patronymic,
+            login, password,
+            position,
+            user_type,
+            email, phone
+        FROM    user        AS U
+                LEFT JOIN
+                    admin   AS A ON A.id_user = U.id
+                LEFT JOIN
+                    client  AS C ON C.id_user = U.id
+        WHERE U.id = #{id} AND deleted = false
+    </select>
+
+    <select id="getUserByJavaSessionId" parameterType="java.lang.String" resultMap="resultUser">
+        SELECT
+            U.id,
+            firstname, lastname, patronymic,
+            login, password,
+            position,
+            user_type,
+            email, phone
+        FROM user       AS U
+            JOIN
+                cookie          ON java_session_id = #{javaSessionId}
+            LEFT JOIN
+                admin   AS A    ON A.id_user = U.id
+            LEFT JOIN
+                client  AS C    ON C.id_user = U.id
+
+        WHERE U.id = cookie.id_user AND deleted = false
+    </select>
+
+</mapper>

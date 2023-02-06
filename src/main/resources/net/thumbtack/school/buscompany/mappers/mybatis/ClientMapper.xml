@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="net.thumbtack.school.buscompany.mappers.mybatis.ClientMapper">
+
+    <resultMap id="resultClient" type="net.thumbtack.school.buscompany.models.Client">
+        <result property=   "id"            column= "id"            />
+        <result property=   "firstName"     column= "firstname"     />
+        <result property=   "lastName"      column= "lastname"      />
+        <result property=   "patronymic"    column= "patronymic"    />
+        <result property=   "login"         column= "login"         />
+        <result property=   "password"      column= "password"      />
+        <result property=   "userType"      column= "user_type"     />
+        <result property=   "phone"         column= "phone"         />
+        <result property=   "email"         column= "email"         />
+
+        <collection property= "orders"
+                    column="id"
+                    javaType="List"
+                    ofType="net.thumbtack.school.buscompany.models.Order"
+                    select="net.thumbtack.school.buscompany.mappers.mybatis.OrderMapper.getOrdersLazyByClient"
+                    fetchType="lazy">
+
+        </collection>
+    </resultMap>
+
+    <select id="getAllClient" resultMap="resultClient">
+        SELECT
+            id,
+            firstname, lastname, patronymic,
+            login, password,
+            user_type,
+            phone, email
+        FROM user
+            JOIN client ON user.id = client.id_user
+        WHERE deleted = false
+    </select>
+
+</mapper>

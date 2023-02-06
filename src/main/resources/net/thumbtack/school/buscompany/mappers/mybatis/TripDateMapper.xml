@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="net.thumbtack.school.buscompany.mappers.mybatis.TripDateMapper">
+
+    <resultMap id="tripDate" type="net.thumbtack.school.buscompany.models.TripDate">
+
+        <result      property="id"   column="id" />
+        <result      property="date" column="trip_date" />
+
+        <association property ="trip"
+                     column   ="id_trip"
+                     javaType ="net.thumbtack.school.buscompany.models.Trip"
+                     select   ="net.thumbtack.school.buscompany.mappers.mybatis.TripMapper.getTripById"
+                     fetchType="lazy">
+        </association>
+
+        <collection property ="orders"
+                    column   ="id"
+                    javaType ="List"
+                    ofType   ="net.thumbtack.school.buscompany.models.Order"
+                    select   ="net.thumbtack.school.buscompany.mappers.mybatis.OrderMapper.getOrdersLazyByTripDate"
+                    fetchType="lazy">
+        </collection>
+
+    </resultMap>
+
+    <select id="getTripDateById" resultMap="tripDate" parameterType="int">
+        SELECT * FROM trip_date WHERE trip_date.id = #{id}
+    </select>
+
+    <select id="getTripsDateByTrip" resultMap="tripDate" parameterType="int">
+        SELECT * FROM trip_date WHERE id_trip = #{idTrip}
+    </select>
+
+</mapper>

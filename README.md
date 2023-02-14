@@ -1,11 +1,10 @@
-### Java Spring template project
+### Билеты на автобусы.
 
-This project is based on a GitLab [Project Template](https://docs.gitlab.com/ee/gitlab-basics/create-project.html).
+Автобусной компании, занимающейся междугородными перевозками пассажирова, требуется сайт, на котором пассажиры
+могли бы заказывать билеты на рейсы.
 
-Improvements can be proposed in the [original project](https://gitlab.com/gitlab-org/project-templates/spring).
-
-### CI/CD with Auto DevOps
-
-This template is compatible with [Auto DevOps](https://docs.gitlab.com/ee/topics/autodevops/).
-
-If Auto DevOps is not already enabled for this project, you can [turn it on](https://docs.gitlab.com/ee/topics/autodevops/#enabling-auto-devops) in the project settings.
+Все рейсы выполняются из начального пункта до конечного пункта, без промежуточных остановок. 
+Автобусная компания не выполняет рейсы с пересадками. 
+Каждому пассажиру выделяется свое место, проезд пассажиров “стоя” не предусмотрен.
+Администраторы компании должны иметь возможность добавлять и удалять рейсы, определять цену билетов и т.п. 
+Клиенты должны иметь возможность покупать билеты.
